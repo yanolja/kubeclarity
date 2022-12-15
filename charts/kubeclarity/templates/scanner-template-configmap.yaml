@@ -160,3 +160,15 @@ data:
               readOnlyRootFilesystem: true
             resources:
 {{- toYaml (index .Values "kubeclarity-runtime-scan" "cis-docker-benchmark-scanner" "resources") | nindent 14 }}
+{{- if index .Values "kubeclarity-runtime-scan" "nodeSelector" }}
+      nodeSelector:
+        {{- toYaml (index .Values "kubeclarity-runtime-scan" "nodeSelector") | nindent 12 }}
+{{- end }}
+{{- if index .Values "kubeclarity-runtime-scan" "affinity" }}
+      affinity:
+        {{- toYaml (index .Values "kubeclarity-runtime-scan" "affinity") | nindent 12 }}
+{{- end }}
+{{- if index .Values "kubeclarity-runtime-scan" "tolerations" }}
+      tolerations:
+        {{- toYaml (index .Values "kubeclarity-runtime-scan" "tolerations") | nindent 12 }}
+{{- end }}

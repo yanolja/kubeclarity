@@ -76,3 +76,15 @@ spec:
             - mountPath: /tmp
               name: tmp-volume
 {{- end}}
+{{- if index .Values "kubeclarity-grype-server" "nodeSelector" }}
+      nodeSelector:
+        {{- toYaml (index .Values "kubeclarity-grype-server" "nodeSelector") | nindent 8 }}
+{{- end }}
+{{- if index .Values "kubeclarity-grype-server" "affinity" }}
+      affinity:
+        {{- toYaml (index .Values "kubeclarity-grype-server" "affinity") | nindent 8 }}
+{{- end }}
+{{- if index .Values "kubeclarity-grype-server" "tolerations" }}
+      tolerations:
+        {{- toYaml (index .Values "kubeclarity-grype-server" "tolerations") | nindent 8 }}
+{{- end }}

@@ -20,8 +20,9 @@ spec:
     spec:
       serviceAccountName: {{ include "kubeclarity.name" . }}
       initContainers:
+{{- if index .Values "kubeclarity-postgresql" "enabled" }}
         - name: '{{ include "kubeclarity.name" . }}-wait-for-pg-db'
-          image: {{ index .Values "kubeclarity-postgresql" "image" "registry" | default "docker.io" }}/{{ index .Values "kubeclarity-postgresql" "image" "repository" | default "bitnami/postgresql" }}:{{ index .Values "kubeclarity-postgresql" "image" "tag" | default "14.4.0-debian-11-r4" }}
+          image: '{{ index .Values "kubeclarity-postgresql" "image" "registry" | default "docker.io" }}/{{ index .Values "kubeclarity-postgresql" "image" "repository" | default "bitnami/postgresql" }}:{{ index .Values "kubeclarity-postgresql" "image" "tag" | default "14.4.0-debian-11-r4" }}'
           command: ['sh', '-c', 'until pg_isready -h {{ include "kubeclarity.name" . }}-postgresql -p 5432 -U "postgres" -d "dbname={{ index .Values "kubeclarity-postgresql" "auth" "database" }}";
             do echo waiting for database; sleep 2; done;']
           securityContext:
@@ -37,6 +38,7 @@ spec:
             readOnlyRootFilesystem: true
           resources:
 {{- toYaml .Values.kubeclarity.initContainers.resources | nindent 12 }}
+{{- end}}
         - name: '{{ include "kubeclarity.name" . }}-wait-for-sbom-db'
           image: curlimages/curl:7.84.0
           args:
@@ -107,12 +109,21 @@ spec:
             {{- end }}
             - name: DB_NAME
               value: {{ index .Values "kubeclarity-postgresql" "auth" "database" }}
+{{- if index .Values "kubeclarity-postgresql" "enabled" }}
             - name: DB_HOST
               value: "{{ include "kubeclarity.name" . }}-postgresql"
             - name: DB_PORT_NUMBER
               value: "5432"
             - name: DB_USER
               value: "postgres"
+{{- else }}
+            - name: DB_HOST
+              value: "{{ index .Values "kubeclarity-postgresql" "auth" "host" }}"
+            - name: DB_PORT_NUMBER
+              value: "{{ index .Values "kubeclarity-postgresql" "auth" "port" }}"
+            - name: DB_USER
+              value: "{{ index .Values "kubeclarity-postgresql" "auth" "user" }}"
+{{- end }}
             - name: DB_PASS
               valueFrom:
                 secretKeyRef:
@@ -154,3 +165,15 @@ spec:
             readOnlyRootFilesystem: true
           resources:
 {{- toYaml .Values.kubeclarity.resources | nindent 12 }}
+{{- if .Values.kubeclarity.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.kubeclarity.nodeSelector | nindent 8 }}
+{{- end }}
+{{- if .Values.kubeclarity.affinity }}
+      affinity:
+        {{- toYaml .Values.kubeclarity.affinity | nindent 8 }}
+{{- end }}
+{{- if .Values.kubeclarity.tolerations }}
+      tolerations:
+        {{- toYaml .Values.kubeclarity.tolerations | nindent 8 }}
+{{- end }}

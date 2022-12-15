@@ -68,3 +68,15 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp-volume
+{{- if index .Values "kubeclarity-sbom-db" "nodeSelector" }}
+      nodeSelector:
+        {{- toYaml (index .Values "kubeclarity-sbom-db" "nodeSelector") | nindent 8 }}
+{{- end }}
+{{- if index .Values "kubeclarity-sbom-db" "affinity" }}
+      affinity:
+        {{- toYaml (index .Values "kubeclarity-sbom-db" "affinity") | nindent 8 }}
+{{- end }}
+{{- if index .Values "kubeclarity-sbom-db" "tolerations" }}
+      tolerations:
+        {{- toYaml (index .Values "kubeclarity-sbom-db" "tolerations") | nindent 8 }}
+{{- end }}
