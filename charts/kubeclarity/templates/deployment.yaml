@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "kubeclarity.name" . }}
+  name: {{ include "kubeclarity.fullname" . }}
   namespace: '{{ .Release.Namespace }}'
   labels:
     {{ include "kubeclarity.labels" . }}
@@ -9,21 +9,21 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ include "kubeclarity.name" . }}
+      app: {{ include "kubeclarity.fullname" . }}
   template:
     metadata:
       labels:
-        app: {{ include "kubeclarity.name" . }}
+        app: {{ include "kubeclarity.fullname" . }}
       {{- with  .Values.kubeclarity.podAnnotations }}
       annotations: {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
-      serviceAccountName: {{ include "kubeclarity.name" . }}
+      serviceAccountName: {{ include "kubeclarity.fullname" . }}
       initContainers:
 {{- if index .Values "kubeclarity-postgresql" "enabled" }}
-        - name: '{{ include "kubeclarity.name" . }}-wait-for-pg-db'
+        - name: '{{ include "kubeclarity.fullname" . }}-wait-for-pg-db'
           image: '{{ index .Values "kubeclarity-postgresql" "image" "registry" | default "docker.io" }}/{{ index .Values "kubeclarity-postgresql" "image" "repository" | default "bitnami/postgresql" }}:{{ index .Values "kubeclarity-postgresql" "image" "tag" | default "14.4.0-debian-11-r4" }}'
-          command: ['sh', '-c', 'until pg_isready -h {{ include "kubeclarity.name" . }}-postgresql -p 5432 -U "postgres" -d "dbname={{ index .Values "kubeclarity-postgresql" "auth" "database" }}";
+          command: ['sh', '-c', 'until pg_isready -h {{ include "kubeclarity.fullname" . }}-postgresql -p 5432 -U "postgres" -d "dbname={{ index .Values "kubeclarity-postgresql" "auth" "database" }}";
             do echo waiting for database; sleep 2; done;']
           securityContext:
             capabilities:
@@ -39,14 +39,14 @@ spec:
           resources:
 {{- toYaml .Values.kubeclarity.initContainers.resources | nindent 12 }}
 {{- end}}
-        - name: '{{ include "kubeclarity.name" . }}-wait-for-sbom-db'
+        - name: '{{ include "kubeclarity.fullname" . }}-wait-for-sbom-db'
           image: curlimages/curl:7.84.0
           args:
             - /bin/sh
             - -c
             - >
               set -x;
-              while [ $(curl -sw '%{http_code}' "http://{{ include "kubeclarity.sbom-db.name" . }}:8081/healthz/ready" -o /dev/null) -ne 200 ]; do
+              while [ $(curl -sw '%{http_code}' "http://{{ include "kubeclarity.sbom-db.fullname" . }}:8081/healthz/ready" -o /dev/null) -ne 200 ]; do
                 echo waiting for sbom database; sleep 2;
               done;
           securityContext:
@@ -63,14 +63,14 @@ spec:
           resources:
 {{- toYaml .Values.kubeclarity.initContainers.resources | nindent 12 }}
 {{- if index .Values "kubeclarity-grype-server" "enabled" }}
-        - name: '{{ include "kubeclarity.name" . }}-wait-for-grype-server'
+        - name: '{{ include "kubeclarity.fullname" . }}-wait-for-grype-server'
           image: curlimages/curl:7.84.0
           args:
             - /bin/sh
             - -c
             - >
               set -x;
-              while [ $(curl -sw '%{http_code}' "http://{{ include "kubeclarity.grype-server.name" . }}:8080/healthz/ready" -o /dev/null) -ne 200 ]; do
+              while [ $(curl -sw '%{http_code}' "http://{{ include "kubeclarity.grype-server.fullname" . }}:8080/healthz/ready" -o /dev/null) -ne 200 ]; do
                 echo waiting for grype-server to be ready; sleep 2;
               done;
           securityContext:
@@ -111,7 +111,7 @@ spec:
               value: {{ index .Values "kubeclarity-postgresql" "auth" "database" }}
 {{- if index .Values "kubeclarity-postgresql" "enabled" }}
             - name: DB_HOST
-              value: "{{ include "kubeclarity.name" . }}-postgresql"
+              value: "{{ include "kubeclarity.fullname" . }}-postgresql"
             - name: DB_PORT_NUMBER
               value: "5432"
             - name: DB_USER
@@ -133,7 +133,7 @@ spec:
             - name: SCANNER_JOB_RESULT_LISTEN_PORT
               value: "{{ index .Values "kubeclarity-runtime-scan" "resultServicePort" }}"
             - name: SCANNER_JOB_TEMPLATE_CONFIG_MAP_NAME
-              value: "{{ include "kubeclarity.name" . }}-scanner-template"
+              value: "{{ include "kubeclarity.fullname" . }}-scanner-template"
             - name: SCANNER_JOB_TEMPLATE_CONFIG_MAP_NAMESPACE
               value: "{{ .Release.Namespace }}"
           readinessProbe:

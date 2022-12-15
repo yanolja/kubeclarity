@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "kubeclarity.grype-server.name" . }}
+  name: {{ include "kubeclarity.grype-server.fullname" . }}
   namespace: '{{ .Release.Namespace }}'
   labels:
     {{ include "kubeclarity.grype-server.labels" . }}
@@ -10,13 +10,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ include "kubeclarity.grype-server.name" . }}
+      app: {{ include "kubeclarity.grype-server.fullname" . }}
   template:
     metadata:
       labels:
-        app: {{ include "kubeclarity.grype-server.name" . }}
+        app: {{ include "kubeclarity.grype-server.fullname" . }}
     spec:
-      serviceAccountName: {{ include "kubeclarity.grype-server.name" . }}
+      serviceAccountName: {{ include "kubeclarity.grype-server.fullname" . }}
       volumes:
         - name: tmp-volume
           emptyDir: {}

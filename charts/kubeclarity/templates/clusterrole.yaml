@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "kubeclarity.name" . }}
+  name: {{ include "kubeclarity.fullname" . }}
   labels:
     {{ include "kubeclarity.labels" . }}
 rules:

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "kubeclarity.sbom-db.name" . }}
+  name: {{ include "kubeclarity.sbom-db.fullname" . }}
   namespace: '{{ .Release.Namespace }}'
   labels:
     {{ include "kubeclarity.sbom-db.labels" . }}
@@ -9,13 +9,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ include "kubeclarity.sbom-db.name" . }}
+      app: {{ include "kubeclarity.sbom-db.fullname" . }}
   template:
     metadata:
       labels:
-        app: {{ include "kubeclarity.sbom-db.name" . }}
+        app: {{ include "kubeclarity.sbom-db.fullname" . }}
     spec:
-      serviceAccountName: {{ include "kubeclarity.sbom-db.name" . }}
+      serviceAccountName: {{ include "kubeclarity.sbom-db.fullname" . }}
       volumes:
         - name: tmp-volume
           emptyDir: {}

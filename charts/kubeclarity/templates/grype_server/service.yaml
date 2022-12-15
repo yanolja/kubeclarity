@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "kubeclarity.grype-server.name" . }}
+  name: {{ include "kubeclarity.grype-server.fullname" . }}
   namespace: '{{ .Release.Namespace }}'
   labels:
     {{ include "kubeclarity.grype-server.labels" . }}
@@ -19,5 +19,5 @@ spec:
       protocol: TCP
       targetPort: {{ index .Values "kubeclarity-grype-server" "servicePort" }}
   selector:
-    app: {{ include "kubeclarity.grype-server.name" . }}
+    app: {{ include "kubeclarity.grype-server.fullname" . }}
 {{- end}}
