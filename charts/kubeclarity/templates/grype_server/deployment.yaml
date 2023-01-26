@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "kubeclarity.grype-server.name" . }}
+  name: {{ include "kubeclarity.grype-server.fullname" . }}
   namespace: '{{ .Release.Namespace }}'
   labels:
     {{ include "kubeclarity.grype-server.labels" . }}
@@ -10,13 +10,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ include "kubeclarity.grype-server.name" . }}
+      app: {{ include "kubeclarity.grype-server.fullname" . }}
   template:
     metadata:
       labels:
-        app: {{ include "kubeclarity.grype-server.name" . }}
+        app: {{ include "kubeclarity.grype-server.fullname" . }}
     spec:
-      serviceAccountName: {{ include "kubeclarity.grype-server.name" . }}
+      serviceAccountName: {{ include "kubeclarity.grype-server.fullname" . }}
       volumes:
         - name: tmp-volume
           emptyDir: {}
@@ -76,3 +76,15 @@ spec:
             - mountPath: /tmp
               name: tmp-volume
 {{- end}}
+{{- if index .Values "kubeclarity-grype-server" "nodeSelector" }}
+      nodeSelector:
+        {{- toYaml (index .Values "kubeclarity-grype-server" "nodeSelector") | nindent 8 }}
+{{- end }}
+{{- if index .Values "kubeclarity-grype-server" "affinity" }}
+      affinity:
+        {{- toYaml (index .Values "kubeclarity-grype-server" "affinity") | nindent 8 }}
+{{- end }}
+{{- if index .Values "kubeclarity-grype-server" "tolerations" }}
+      tolerations:
+        {{- toYaml (index .Values "kubeclarity-grype-server" "tolerations") | nindent 8 }}
+{{- end }}

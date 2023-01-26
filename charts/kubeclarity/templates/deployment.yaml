@@ -188,3 +188,15 @@ spec:
             readOnlyRootFilesystem: true
           resources:
 {{- toYaml .Values.kubeclarity.resources | nindent 12 }}
+{{- if .Values.kubeclarity.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.kubeclarity.nodeSelector | nindent 8 }}
+{{- end }}
+{{- if .Values.kubeclarity.affinity }}
+      affinity:
+        {{- toYaml .Values.kubeclarity.affinity | nindent 8 }}
+{{- end }}
+{{- if .Values.kubeclarity.tolerations }}
+      tolerations:
+        {{- toYaml .Values.kubeclarity.tolerations | nindent 8 }}
+{{- end }}
