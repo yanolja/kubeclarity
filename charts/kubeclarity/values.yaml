@@ -93,9 +93,6 @@ kubeclarity:
       memory: "1000Mi"
       cpu: "1000m"
 
-  clusterRole:
-    readClusterSecrets: true
-
   initContainers:
     resources:
       requests:
@@ -122,14 +119,18 @@ kubeclarity-runtime-scan:
     sidecar.istio.io/inject: "false"
 
   ## Scanner pods tolerations.
-  tolerations:
-#   - key: key1
-#     operator: Exists
-#     effect: NoSchedule
-#   - key: key1
-#     operator: Equal
-#     effect: NoSchedule
-#     value: "value1"
+  # tolerations:
+  # - key: key1
+  #   operator: Exists
+  #   effect: NoSchedule
+  # - key: key1
+  #   operator: Equal
+  #   effect: NoSchedule
+  #   value: "value1"
+
+  ## Scanner pods nodeSelector.
+  # nodeSelector:
+  #   key1: value1
 
   registry:
     skipVerifyTlS: "false"
@@ -232,7 +233,7 @@ kubeclarity-grype-server:
   ## Docker Image values.
   docker:
     imageRepo: "gcr.io/eticloud/k8sec"
-    imageTag: "v0.1.4"
+    imageTag: "v0.1.5"
     imagePullPolicy: Always
 
   ## Logging level (debug, info, warning, error, fatal, panic).
@@ -331,7 +332,7 @@ kubeclarity-postgresql:
   image:
     registry: docker.io
     repository: bitnami/postgresql
-    tag: 14.4.0-debian-11-r4
+    tag: 14.6.0-debian-11-r31
 
   ## initdb parameters
   # initdb:

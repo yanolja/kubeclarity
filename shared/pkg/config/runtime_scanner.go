@@ -30,6 +30,7 @@ const (
 	ScanUUID              = "SCAN_UUID"
 	RegistrySkipVerifyTlS = "REGISTRY_SKIP_VERIFY_TLS"
 	RegistryUseHTTP       = "REGISTRY_USE_HTTP"
+	ImagePullSecretPath   = "IMAGE_PULL_SECRET_PATH" // nolint:gosec
 )
 
 func setRegistryConfigDefaults() {
@@ -40,19 +41,34 @@ func setRegistryConfigDefaults() {
 func LoadRuntimeScannerRegistryConfig(imageID string) *Registry {
 	setRegistryConfigDefaults()
 
-	username, password, err := creds.ExtractCredentials(imageID)
-	if err != nil {
-		log.Warnf("Failed to extract credentials for imageID %v: %v", imageID, err)
+	var auths []Auth
+
+	imagePullSecretPath := viper.GetString(ImagePullSecretPath)
+	if imagePullSecretPath != "" {
+		authConfig, err := creds.GetAuthConfigFromPullSecretPath(imagePullSecretPath, imageID)
+		if err != nil {
+			// Just log the issue don't fail, getting the credentials is best effort
+			log.Warnf("Failed to resolve auth config from pull secrets: %v", err)
+		} else {
+			var auth Auth
+			if authConfig.Username != "" {
+				auth.Username = authConfig.Username
+			}
+
+			if authConfig.Password != "" {
+				auth.Password = authConfig.Password
+			}
+
+			if authConfig.RegistryToken != "" {
+				auth.Token = authConfig.RegistryToken
+			}
+			auths = append(auths, auth)
+		}
 	}
 
 	return &Registry{
 		SkipVerifyTLS: viper.GetBool(RegistrySkipVerifyTlS),
 		UseHTTP:       viper.GetBool(RegistryUseHTTP),
-		Auths: Auths{
-			{
-				Username: username,
-				Password: password,
-			},
-		},
+		Auths:         auths,
 	}
 }

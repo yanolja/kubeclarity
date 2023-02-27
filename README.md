@@ -165,8 +165,8 @@ KubeClarity vulnerability scanner integrates with the following scanners:
 > KubeClarity requires these K8s permissions:
 > | Permission | Reason |
 > | ---        | ---    |
-> | Read secrets in cluster scope. | This is required for getting image pull secrets for scanning private image repositories. |
-> | Read config maps in cluster scope. | This is required for getting the configured template of the scanner job. |
+> | Read secrets in CREDS_SECRET_NAMESPACE (default: kubeclarity) | This is allow you to configure image pull secrets for scanning private image repositories. |
+> | Read config maps in the KubeClarity deployment namespace. | This is required for getting the configured template of the scanner job. |
 > | List pods in cluster scope. | This is required for calculating the target pods that need to be scanned. |
 > | List namespaces. | This is required for fetching the target namespaces to scan in K8s runtime scan UI. |
 > | Create & delete jobs in cluster scope. | This is required for managing the jobs that will scan the target pods in their namespaces. |
@@ -358,6 +358,9 @@ kubeclarity scan registry/nginx:private --config $HOME/own-kubeclarity-config
 Kubeclarity is using [k8schain](https://github.com/google/go-containerregistry/tree/main/pkg/authn/k8schain#k8schain) of google/go-containerregistry for authenticating to the registries.
 If the necessary service credentials are not discoverable by the k8schain, they can be defined via secrets described below.
 
+In addition, if service credentials are not located in "kubeclarity" Namespace, please set CREDS_SECRET_NAMESPACE to kubeclarity Deployment.
+When using helm [charts](/charts), CREDS_SECRET_NAMESPACE is set to the release namespace installed kubeclarity.
+
 ### Amazon ECR
 
 Create an [AWS IAM user](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html#id_users_create_console) with `AmazonEC2ContainerRegistryFullAccess` permissions.
@@ -488,7 +491,7 @@ so can be run in kubernetes or via docker standalone.
 
 To start the server:
 ```
-docker run -p 9991:9991 --rm gcr.io/eticloud/k8sec/grype-server:v0.1.4
+docker run -p 9991:9991 --rm gcr.io/eticloud/k8sec/grype-server:v0.1.5
 ```
 
 To run a scan using the server:
@@ -518,6 +521,8 @@ Pull requests and bug reports are welcome.
 
 For larger changes please create an Issue in GitHub first to discuss your
 proposed changes and possible implications.
+
+More more details please see the [Contribution guidelines for this project](CONTRIBUTING.md)
 
 ## License
 

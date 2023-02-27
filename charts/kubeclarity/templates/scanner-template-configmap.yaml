@@ -1,3 +1,10 @@
+{{- $noproxy := list (print (include "kubeclarity.name" .) "." .Release.Namespace ":" (index .Values "kubeclarity-runtime-scan" "resultServicePort")) -}}
+{{- if index .Values "kubeclarity-grype-server" "enabled" -}}
+{{- $noproxy = append $noproxy (print (include "kubeclarity.grype-server.name" .) "." .Release.Namespace ":" (index .Values "kubeclarity-grype-server" "servicePort")) -}}
+{{- end -}}
+{{- if index .Values "kubeclarity-trivy-server" "enabled" -}}
+{{- $noproxy = append $noproxy (print ((index .Values "kubeclarity-trivy-server" "service" "name") | default (include "trivy.fullname" (index .Subcharts "kubeclarity-trivy-server"))) "." .Release.Namespace ":" (index .Values "kubeclarity-trivy-server" "service" "port")) -}}
+{{- end -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -23,6 +30,10 @@ data:
 {{- if (index .Values "kubeclarity-runtime-scan" "tolerations") }}
           tolerations:
 {{- toYaml (index .Values "kubeclarity-runtime-scan" "tolerations") | nindent 12 }}
+{{- end}}
+{{- if (index .Values "kubeclarity-runtime-scan" "nodeSelector") }}
+          nodeSelector:
+{{- toYaml (index .Values "kubeclarity-runtime-scan" "nodeSelector") | nindent 12 }}
 {{- end}}
           restartPolicy: Never
           volumes:
@@ -109,10 +120,10 @@ data:
 {{- end}}
 {{- if index .Values "kubeclarity-runtime-scan" "httpsProxy" }}
             - name: NO_PROXY
-              value: {{ include "kubeclarity.name" . }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-runtime-scan" "resultServicePort" }},{{ include "kubeclarity.grype-server.name" . }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-grype-server" "servicePort" }},{{ (index .Values "kubeclarity-trivy-server" "service" "name") | default (include "trivy.fullname" (index .Subcharts "kubeclarity-trivy-server")) }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-trivy-server" "service" "port" }}
+              value: {{ join "," $noproxy }}
 {{- else if index .Values "kubeclarity-runtime-scan" "httpProxy" }}
             - name: NO_PROXY
-              value: {{ include "kubeclarity.name" . }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-runtime-scan" "resultServicePort" }},{{ include "kubeclarity.grype-server.name" . }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-grype-server" "servicePort" }},{{ (index .Values "kubeclarity-trivy-server" "service" "name") | default (include "trivy.fullname" (index .Subcharts "kubeclarity-trivy-server")) }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-trivy-server" "service" "port" }}
+              value: {{ join "," $noproxy }}
 {{- end}}
             securityContext:
               capabilities:
@@ -158,10 +169,10 @@ data:
 {{- end}}
 {{- if index .Values "kubeclarity-runtime-scan" "httpsProxy" }}
             - name: NO_PROXY
-              value: {{ include "kubeclarity.name" . }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-runtime-scan" "resultServicePort" }},{{ include "kubeclarity.grype-server.name" . }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-grype-server" "servicePort" }},{{ (index .Values "kubeclarity-trivy-server" "service" "name") | default (include "trivy.fullname" (index .Subcharts "kubeclarity-trivy-server")) }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-trivy-server" "service" "port" }}
+              value: {{ join "," $noproxy }}
 {{- else if index .Values "kubeclarity-runtime-scan" "httpProxy" }}
             - name: NO_PROXY
-              value: {{ include "kubeclarity.name" . }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-runtime-scan" "resultServicePort" }},{{ include "kubeclarity.grype-server.name" . }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-grype-server" "servicePort" }},{{ (index .Values "kubeclarity-trivy-server" "service" "name") | default (include "trivy.fullname" (index .Subcharts "kubeclarity-trivy-server")) }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-trivy-server" "service" "port" }}
+              value: {{ join "," $noproxy }}
 {{- end}}
             securityContext:
               capabilities:
