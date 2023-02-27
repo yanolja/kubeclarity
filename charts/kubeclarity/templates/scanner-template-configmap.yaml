@@ -1,6 +1,6 @@
-{{- $noproxy := list (print (include "kubeclarity.name" .) "." .Release.Namespace ":" (index .Values "kubeclarity-runtime-scan" "resultServicePort")) -}}
+{{- $noproxy := list (print (include "kubeclarity.fullname" .) "." .Release.Namespace ":" (index .Values "kubeclarity-runtime-scan" "resultServicePort")) -}}
 {{- if index .Values "kubeclarity-grype-server" "enabled" -}}
-{{- $noproxy = append $noproxy (print (include "kubeclarity.grype-server.name" .) "." .Release.Namespace ":" (index .Values "kubeclarity-grype-server" "servicePort")) -}}
+{{- $noproxy = append $noproxy (print (include "kubeclarity.grype-server.fullname" .) "." .Release.Namespace ":" (index .Values "kubeclarity-grype-server" "servicePort")) -}}
 {{- end -}}
 {{- if index .Values "kubeclarity-trivy-server" "enabled" -}}
 {{- $noproxy = append $noproxy (print ((index .Values "kubeclarity-trivy-server" "service" "name") | default (include "trivy.fullname" (index .Subcharts "kubeclarity-trivy-server"))) "." .Release.Namespace ":" (index .Values "kubeclarity-trivy-server" "service" "port")) -}}
