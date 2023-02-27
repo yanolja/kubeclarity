@@ -1,14 +1,14 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ include "kubeclarity.name" . }}
+  name: {{ include "kubeclarity.fullname" . }}
   labels:
     {{ include "kubeclarity.labels" . }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ include "kubeclarity.name" . }}
+  name: {{ include "kubeclarity.fullname" . }}
 subjects:
   - kind: ServiceAccount
-    name: {{ include "kubeclarity.name" . }}
+    name: {{ include "kubeclarity.fullname" . }}
     namespace: '{{ .Release.Namespace }}'
