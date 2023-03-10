@@ -118,10 +118,8 @@ kubeclarity-runtime-scan:
     app: kubeclarity-scanner
     sidecar.istio.io/inject: "false"
 
-  nodeSelector: {}
-  affinity: {}
   ## Scanner pods tolerations.
-  tolerations: []
+  # tolerations: []
   #   - key: key1
   #     operator: Exists
   #     effect: NoSchedule
@@ -251,9 +249,17 @@ kubeclarity-grype-server:
       cpu: "1000m"
       memory: "1G"
 
-  nodeSelector: {}
-  affinity: {}
-  tolerations: []
+  # tolerations: []
+  #   - key: key1
+  #     operator: Exists
+  #     effect: NoSchedule
+  #   - key: key1
+  #     operator: Equal
+  #     effect: NoSchedule
+  #     value: "value1"
+
+  # nodeSelector:
+  #   key1: value1
 
 ## End of KubeClarity Grype Server Values
 #######################################################################################
@@ -299,9 +305,17 @@ kubeclarity-trivy-server:
       cpu: "1000m"
       memory: "1G"
 
-  nodeSelector: {}
-  affinity: {}
-  tolerations: []
+  # tolerations: []
+  #   - key: key1
+  #     operator: Exists
+  #     effect: NoSchedule
+  #   - key: key1
+  #     operator: Equal
+  #     effect: NoSchedule
+  #     value: "value1"
+
+  # nodeSelector:
+  #   key1: value1
 
 ## End of KubeClarity Trivy Server Values
 #######################################################################################
@@ -329,9 +343,17 @@ kubeclarity-sbom-db:
       memory: "100Mi"
       cpu: "100m"
 
-  nodeSelector: {}
-  affinity: {}
-  tolerations: []
+  # tolerations: []
+  #   - key: key1
+  #     operator: Exists
+  #     effect: NoSchedule
+  #   - key: key1
+  #     operator: Equal
+  #     effect: NoSchedule
+  #     value: "value1"
+
+  # nodeSelector:
+  #   key1: value1
 
 ## End of KubeClarity SBOM DB Values
 #######################################################################################
@@ -402,9 +424,17 @@ kubeclarity-postgresql:
       memory: "1000Mi"
       cpu: "1000m"
 
-  nodeSelector: {}
-  affinity: {}
-  tolerations: []
+  # tolerations: []
+  #   - key: key1
+  #     operator: Exists
+  #     effect: NoSchedule
+  #   - key: key1
+  #     operator: Equal
+  #     effect: NoSchedule
+  #     value: "value1"
+
+  # nodeSelector:
+  #   key1: value1
 
 # End of KubeClarity Internal Postgres Values
 #######################################################################################
