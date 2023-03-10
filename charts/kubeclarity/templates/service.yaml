@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "kubeclarity.name" . }}
+  name: {{ include "kubeclarity.fullname" . }}
   namespace: '{{ .Release.Namespace }}'
   labels:
     {{ include "kubeclarity.labels" . }}
@@ -20,4 +20,4 @@ spec:
       protocol: TCP
       targetPort: {{ index .Values "kubeclarity-runtime-scan" "resultServicePort" }}
   selector:
-    app: {{ include "kubeclarity.name" . }}
+    app: {{ include "kubeclarity.fullname" . }}

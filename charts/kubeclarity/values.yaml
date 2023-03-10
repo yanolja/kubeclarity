@@ -118,15 +118,17 @@ kubeclarity-runtime-scan:
     app: kubeclarity-scanner
     sidecar.istio.io/inject: "false"
 
+  nodeSelector: {}
+  affinity: {}
   ## Scanner pods tolerations.
-  # tolerations:
-  # - key: key1
-  #   operator: Exists
-  #   effect: NoSchedule
-  # - key: key1
-  #   operator: Equal
-  #   effect: NoSchedule
-  #   value: "value1"
+  tolerations: []
+  #   - key: key1
+  #     operator: Exists
+  #     effect: NoSchedule
+  #   - key: key1
+  #     operator: Equal
+  #     effect: NoSchedule
+  #     value: "value1"
 
   ## Scanner pods nodeSelector.
   # nodeSelector:
@@ -249,6 +251,10 @@ kubeclarity-grype-server:
       cpu: "1000m"
       memory: "1G"
 
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+
 ## End of KubeClarity Grype Server Values
 #######################################################################################
 
@@ -293,6 +299,10 @@ kubeclarity-trivy-server:
       cpu: "1000m"
       memory: "1G"
 
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+
 ## End of KubeClarity Trivy Server Values
 #######################################################################################
 
@@ -318,6 +328,10 @@ kubeclarity-sbom-db:
     limits:
       memory: "100Mi"
       cpu: "100m"
+
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
 
 ## End of KubeClarity SBOM DB Values
 #######################################################################################
@@ -387,6 +401,10 @@ kubeclarity-postgresql:
     limits:
       memory: "1000Mi"
       cpu: "1000m"
+
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
 
 # End of KubeClarity Internal Postgres Values
 #######################################################################################

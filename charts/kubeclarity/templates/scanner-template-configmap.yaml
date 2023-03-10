@@ -1,6 +1,6 @@
-{{- $noproxy := list (print (include "kubeclarity.name" .) "." .Release.Namespace ":" (index .Values "kubeclarity-runtime-scan" "resultServicePort")) -}}
+{{- $noproxy := list (print (include "kubeclarity.fullname" .) "." .Release.Namespace ":" (index .Values "kubeclarity-runtime-scan" "resultServicePort")) -}}
 {{- if index .Values "kubeclarity-grype-server" "enabled" -}}
-{{- $noproxy = append $noproxy (print (include "kubeclarity.grype-server.name" .) "." .Release.Namespace ":" (index .Values "kubeclarity-grype-server" "servicePort")) -}}
+{{- $noproxy = append $noproxy (print (include "kubeclarity.grype-server.fullname" .) "." .Release.Namespace ":" (index .Values "kubeclarity-grype-server" "servicePort")) -}}
 {{- end -}}
 {{- if index .Values "kubeclarity-trivy-server" "enabled" -}}
 {{- $noproxy = append $noproxy (print ((index .Values "kubeclarity-trivy-server" "service" "name") | default (include "trivy.fullname" (index .Subcharts "kubeclarity-trivy-server"))) "." .Release.Namespace ":" (index .Values "kubeclarity-trivy-server" "service" "port")) -}}
@@ -8,7 +8,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "kubeclarity.name" . }}-scanner-template
+  name: {{ include "kubeclarity.fullname" . }}-scanner-template
   namespace: '{{ .Release.Namespace }}'
   labels:
     {{ include "kubeclarity.labels" . }}
@@ -27,6 +27,14 @@ data:
           labels:
 {{- toYaml (index .Values "kubeclarity-runtime-scan" "labels") | nindent 12 }}
         spec:
+{{- if (index .Values "kubeclarity-runtime-scan" "nodeSelector") }}
+          nodeSelector:
+{{- toYaml (index .Values "kubeclarity-runtime-scan" "nodeSelector") | nindent 12 }}
+{{- end }}
+{{- if (index .Values "kubeclarity-runtime-scan" "affinity") }}
+          affinity:
+{{- toYaml (index .Values "kubeclarity-runtime-scan" "affinity") | nindent 12 }}
+{{- end }}
 {{- if (index .Values "kubeclarity-runtime-scan" "tolerations") }}
           tolerations:
 {{- toYaml (index .Values "kubeclarity-runtime-scan" "tolerations") | nindent 12 }}
@@ -60,9 +68,9 @@ data:
             - {{ index .Values "kubeclarity-runtime-scan" "vulnerability-scanner" "logLevel" }}
             env:
             - name: RESULT_SERVICE_ADDR
-              value: {{ include "kubeclarity.name" . }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-runtime-scan" "resultServicePort" }}
+              value: {{ include "kubeclarity.fullname" . }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-runtime-scan" "resultServicePort" }}
             - name: SBOM_DB_ADDR
-              value: {{ include "kubeclarity.sbom-db.name" . }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-sbom-db" "servicePort" }}
+              value: {{ include "kubeclarity.sbom-db.fullname" . }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-sbom-db" "servicePort" }}
             - name: ANALYZER_LIST
               value: {{ index .Values "kubeclarity-runtime-scan" "vulnerability-scanner" "analyzer" "analyzerList" }}
             - name: ANALYZER_SCOPE
@@ -79,7 +87,7 @@ data:
               value: {{ index .Values "kubeclarity-runtime-scan" "registry" "useHTTP" }}
 {{- if index .Values "kubeclarity-grype-server" "enabled" }}
             - name: SCANNER_REMOTE_GRYPE_SERVER_ADDRESS
-              value: {{ include "kubeclarity.grype-server.name" . }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-grype-server" "servicePort" }}
+              value: {{ include "kubeclarity.grype-server.fullname" . }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-grype-server" "servicePort" }}
             - name: SCANNER_REMOTE_GRYPE_SERVER_TIMEOUT
               value: {{ index .Values "kubeclarity-runtime-scan" "vulnerability-scanner" "scanner" "grype" "remote-grype" "timeout" }}
 {{- end }}
@@ -152,7 +160,7 @@ data:
             - {{ index .Values "kubeclarity-runtime-scan" "cis-docker-benchmark-scanner" "logLevel" }}
             env:
             - name: RESULT_SERVICE_ADDR
-              value: {{ include "kubeclarity.name" . }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-runtime-scan" "resultServicePort" }}
+              value: {{ include "kubeclarity.fullname" . }}.{{ .Release.Namespace }}:{{ index .Values "kubeclarity-runtime-scan" "resultServicePort" }}
             - name: TIMEOUT
               value: {{ index .Values "kubeclarity-runtime-scan" "cis-docker-benchmark-scanner" "timeout" }}
             - name: REGISTRY_SKIP_VERIFY_TLS
