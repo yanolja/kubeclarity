@@ -44,6 +44,7 @@ type Scanner struct {
 	scannerJobTemplate *batchv1.Job
 	scanConfig         *_config.ScanConfig
 	killSignal         chan bool
+	killChanClosed     atomic.Bool
 	clientset          kubernetes.Interface
 	logFields          log.Fields
 	credentialAdders   []_creds.CredentialAdder
@@ -203,7 +204,14 @@ func (s *Scanner) initScan() error {
 		// inform the scanner where to check for credentials to pull
 		// the image to scan.
 		imagePullSecretNames := []string{}
+		imagePullSecretNamesSet := make(map[string]struct{})
 		for _, ips := range pod.Spec.ImagePullSecrets {
+			// avoid cases where a pod has the same imagePullSecret more than once.
+			if _, ok := imagePullSecretNamesSet[ips.Name]; ok {
+				log.WithFields(s.logFields).Warnf("Duplicate image pull secret name: %v", ips.Name)
+				continue
+			}
+			imagePullSecretNamesSet[ips.Name] = struct{}{}
 			imagePullSecretNames = append(imagePullSecretNames, ips.Name)
 		}
 
@@ -497,5 +505,9 @@ func (s *Scanner) Clear() {
 	defer s.Unlock()
 
 	log.WithFields(s.logFields).Infof("Clearing...")
-	close(s.killSignal)
+	// Make sure to close the channel only once.
+	if !s.killChanClosed.Load() {
+		close(s.killSignal)
+		s.killChanClosed.Store(true)
+	}
 }

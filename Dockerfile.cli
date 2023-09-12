@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.2
-FROM golang:1.20.2-alpine AS builder
+FROM golang:1.21.1-alpine AS builder
 
 RUN apk add --update --no-cache gcc g++ git ca-certificates build-base
 
@@ -25,7 +25,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     CGO_ENABLED=0 go build -ldflags="-s -w \
      -X 'github.com/openclarity/kubeclarity/cli/pkg.GitRevision=${COMMIT_HASH}'" -o cli ./main.go
 
-FROM alpine:3.17
+FROM alpine:3.18
 
 WORKDIR /app
 

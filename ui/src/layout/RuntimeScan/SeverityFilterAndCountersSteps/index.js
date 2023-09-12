@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFetch, usePrevious } from 'hooks';
 import { components } from 'react-select';
-import { useFilterDispatch, setFilters, FILTERR_TYPES } from 'context/FiltersProvider';
+import { useFilterDispatch, setFilters, setRuntimeScanFilter, FILTER_TYPES } from 'context/FiltersProvider';
 import Icon, { ICON_NAMES } from 'components/Icon';
 import { OPERATORS } from 'components/Filter';
 import Button from 'components/Button';
@@ -14,19 +14,19 @@ import StepDisplay from '../StepDisplay';
 import './severity-filter-and-counters-steps.scss';
 
 const CIS_LINKS_DISPLAY_MAP = [
-    {title: "Applications", dataKey: "applications", route: ROUTES.APPLICATIONS, filter: FILTERR_TYPES.APPLICATIONS},
-    {title: "Application Resources", dataKey: "resources", route: ROUTES.APPLICATION_RESOURCES, filter: FILTERR_TYPES.APPLICATION_RESOURCES}
+    {title: "Applications", dataKey: "applications", route: ROUTES.APPLICATIONS, filter: FILTER_TYPES.APPLICATIONS},
+    {title: "Application Resources", dataKey: "resources", route: ROUTES.APPLICATION_RESOURCES, filter: FILTER_TYPES.APPLICATION_RESOURCES}
 ];
 
 const LINKS_DISPLAY_MAP = [
     ...CIS_LINKS_DISPLAY_MAP,
-    {title: "Packages", dataKey: "packages", route: ROUTES.PACKAGES, filter: FILTERR_TYPES.PACKAGES},
-    {title: "Vulnerabilities", dataKey: "vulnerabilities", route: ROUTES.VULNERABILITIES, filter: FILTERR_TYPES.VULNERABILITIES}
+    {title: "Packages", dataKey: "packages", route: ROUTES.PACKAGES, filter: FILTER_TYPES.PACKAGES},
+    {title: "Vulnerabilities", dataKey: "vulnerabilities", route: ROUTES.VULNERABILITIES, filter: FILTER_TYPES.VULNERABILITIES}
 ];
 
 const FILTER_TYPE_ITEMS = {
-    VULNERABILITY: {value: "VULNERABILITY", label: "Vulnerability", runtimeFilter: "vulnerabilitySeverity[gte]", tablesFitler: "vulnerabilitySeverity", countersKey: "counters"},
-    CIS: {value: "CIS", label: "CIS Docker Benchmark", runtimeFilter: "cisDockerBenchmarkLevel[gte]", tablesFitler: "cisDockerBenchmarkLevel", countersKey: "cisDockerBenchmarkCounters"}
+    VULNERABILITY: {value: "VULNERABILITY", label: "Vulnerability", runtimeFilter: "vulnerabilitySeverity[gte]", tablesFilter: "vulnerabilitySeverity", countersKey: "counters"},
+    CIS: {value: "CIS", label: "CIS Docker Benchmark", runtimeFilter: "cisDockerBenchmarkLevel[gte]", tablesFilter: "cisDockerBenchmarkLevel", countersKey: "cisDockerBenchmarkCounters"}
 }
 
 const SelectItem = ({label, color, icon}) => (
@@ -116,7 +116,7 @@ const SeverityFilterAndCountersSteps = ({cisDockerBenchmarkScanEnabled}) => {
 
     const [selectedFilter, setSelectedFilter] = useState(null);
     const {severity, type} = selectedFilter || {};
-    const {runtimeFilter, tablesFitler, countersKey} = FILTER_TYPE_ITEMS[type] || {};
+    const {runtimeFilter, tablesFilter, countersKey} = FILTER_TYPE_ITEMS[type] || {};
 
     useEffect(() => {
         if (!!severity) {
@@ -141,8 +141,8 @@ const SeverityFilterAndCountersSteps = ({cisDockerBenchmarkScanEnabled}) => {
                                 return {...linkItem, title: `${title} (${itemCount})`, disabled: !itemCount};
                             }).map(({title, dataKey, route, filter, disabled}, index, items) => {
                                 const onCounterClick = () => {
-                                    setFilters(filtersDispatch, {type: filter, filters: {currentRuntimeScan: {items, current: dataKey, minimalSeverity: severity, severityKey: tablesFitler}}, isSystem: true});
-                                    setFilters(filtersDispatch, {type: filter, filters: [{scope: tablesFitler, operator: OPERATORS.gte.value, value: [severity]}], isSystem: false});
+                                    setRuntimeScanFilter(filtersDispatch, {items, current: dataKey, minimalSeverity: severity, severityKey: tablesFilter});
+                                    setFilters(filtersDispatch, {type: filter, filters: [{scope: tablesFilter, operator: OPERATORS.gte.value, value: [severity]}], isSystem: false});
                                     navigate(route);
                                 }
             

@@ -11,12 +11,13 @@ metadata:
   name: {{ include "kubeclarity.name" . }}-scanner-template
   namespace: '{{ .Release.Namespace }}'
   labels:
-    {{ include "kubeclarity.labels" . }}
+    {{- include "kubeclarity.labels" . | nindent 4 }}
 data:
   config: |-
     apiVersion: batch/v1
     kind: Job
     metadata:
+      namespace: {{ index .Values "kubeclarity-runtime-scan" "namespace" | quote }}
       labels:
 {{- toYaml (index .Values "kubeclarity-runtime-scan" "labels") | nindent 8 }}
     spec:
@@ -42,7 +43,7 @@ data:
           {{- if not .Values.global.openShiftRestricted }}
           securityContext:
             fsGroup: 1001
-          {{- end }}         
+          {{- end }}
           containers:
           - name: vulnerability-scanner
             {{- if index .Values "kubeclarity-runtime-scan" "vulnerability-scanner" "docker" "imageName" }}

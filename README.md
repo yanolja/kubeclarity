@@ -1,4 +1,8 @@
-![](images/kubeclarity-logo.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./images/logos/KubeClarity-logo-dark-bg-horizontal@4x.png">
+  <source media="(prefers-color-scheme: light)" srcset="./images/logos/KubeClarity-logo-light-bg-horizontal@4x.png">
+  <img alt="KubeClarity Logo" src="./images/logos/KubeClarity-logo-light-bg-horizontal@4x.png">
+</picture>
 
 KubeClarity is a tool for detection and management of Software Bill Of Materials (SBOM) and vulnerabilities of container images and filesystems. It scans both runtime K8s clusters and CI/CD pipelines for enhanced software supply chain security.
 
@@ -15,6 +19,7 @@ KubeClarity is a tool for detection and management of Software Bill Of Materials
 - [Getting Started](#getting-started)
   - [KubeClarity Backend](#kubeclarity-backend)
     - [Install using Helm](#install-using-helm)
+    - [Uninstall using Helm](#uninstall-using-helm)
     - [Build and Run Locally with Demo Data](#build-and-run-locally-with-demo-data)
   - [CLI](#cli)
     - [Installation](#installation)
@@ -170,6 +175,22 @@ KubeClarity vulnerability scanner integrates with the following scanners:
 > | List pods in cluster scope. | This is required for calculating the target pods that need to be scanned. |
 > | List namespaces. | This is required for fetching the target namespaces to scan in K8s runtime scan UI. |
 > | Create & delete jobs in cluster scope. | This is required for managing the jobs that will scan the target pods in their namespaces. |
+
+### Uninstall using Helm:
+
+1. Helm uninstall
+
+   ```shell
+   helm uninstall kubeclarity -n kubeclarity
+   ```
+
+2. Clean resources
+
+    By default, Helm will not remove the PVCs and PVs for the StatefulSets. Run the following command to delete them all:
+
+    ```shell
+    kubectl delete pvc -l app.kubernetes.io/instance=kubeclarity -n kubeclarity
+    ```
 
 ### Build and Run Locally with Demo Data
 
@@ -461,7 +482,7 @@ server in kubernetes/docker which we'll use in the examples here.
 
 To start the server:
 ```
-docker run -p 8080:8080 --rm aquasec/trivy:0.34.0 server --listen 0.0.0.0:8080
+docker run -p 8080:8080 --rm aquasec/trivy:0.41.0 server --listen 0.0.0.0:8080
 ```
 
 To run a scan using the server:
@@ -474,7 +495,7 @@ unauthorized use of a trivy server instance. You can enable it by running the
 server with the extra flag:
 
 ```
-docker run -p 8080:8080 --rm aquasec/trivy:0.34.0 server --listen 0.0.0.0:8080 --token mytoken
+docker run -p 8080:8080 --rm aquasec/trivy:0.41.0 server --listen 0.0.0.0:8080 --token mytoken
 ```
 
 and passing the token to the scanner:
@@ -496,7 +517,12 @@ docker run -p 9991:9991 --rm gcr.io/eticloud/k8sec/grype-server:v0.1.5
 
 To run a scan using the server:
 ```
-SCANNERS_LIST="grype" SCANNER_GRYPE_MODE="remote" SCANNER_REMOTE_GRYPE_SERVER_ADDRESS="<grype server address>:9991" ./kubeclarity_cli scan --input-type sbom nginx.sbom
+SCANNERS_LIST="grype" SCANNER_GRYPE_MODE="remote" SCANNER_REMOTE_GRYPE_SERVER_ADDRESS="<grype server address>:9991" SCANNER_REMOTE_GRYPE_SERVER_SCHEMES="https" ./kubeclarity_cli scan --input-type sbom nginx.sbom
+```
+
+If Grype server is deployed with TLS you can override the default URL scheme like:
+```
+SCANNERS_LIST="grype" SCANNER_GRYPE_MODE="remote" SCANNER_REMOTE_GRYPE_SERVER_ADDRESS="<grype server address>:9991" SCANNER_REMOTE_GRYPE_SERVER_SCHEMES="https" ./kubeclarity_cli scan --input-type sbom nginx.sbom
 ```
 
 ### Dependency Track

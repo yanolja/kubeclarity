@@ -22,10 +22,11 @@ Name of the chart.
 Helm labels.
 */}}
 {{- define "kubeclarity.labels" -}}
-    app.kubernetes.io/name: {{ include "kubeclarity.name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+app.kubernetes.io/name: {{ include "kubeclarity.name" . }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+app: {{ include "kubeclarity.name" . }}
 {{- end -}}
 
 {{- define "kubeclarity.sbom-db.labels" -}}

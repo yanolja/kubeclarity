@@ -49,12 +49,17 @@ kubeclarity:
 
   prometheus:
     enabled: false
+    serviceMonitor:
+      enabled: false
+      interval: 30s
+      annotations: {}
     refreshIntervalSeconds: 300
 
   podAnnotations: {}
 
   service:
     type: ClusterIP
+    port: 8080
     annotations: {}
 
   ingress:
@@ -117,6 +122,13 @@ kubeclarity-runtime-scan:
   labels:
     app: kubeclarity-scanner
     sidecar.istio.io/inject: "false"
+
+  ## Scanner jobs namespace.
+  # If left blank, the scanner jobs will run in the same namespace as pod being scanned.
+  # If set, the scanner jobs will run in the given namespace unless:
+  # 1. The scanner job must run in the pod namespace to fetch image pull secrets, OR
+  # 2. The scanner job must run in the release namespace to fetch service credentials (more info in https://github.com/openclarity/kubeclarity#private-registries-support-for-k8s-runtime-scan)
+  namespace: ""
 
   ## Scanner pods tolerations.
   # tolerations:
@@ -183,7 +195,7 @@ kubeclarity-runtime-scan:
       analyzerScope: "squashed"
 
       trivy:
-        ## Enable trivy scanner, if true make sure to add it to analyzerList above
+        ## Enable trivy analyzer, if true make sure to add it to analyzerList above
         ##
         enabled: false
         timeout: "300"
@@ -232,8 +244,8 @@ kubeclarity-grype-server:
 
   ## Docker Image values.
   docker:
-    imageRepo: "gcr.io/eticloud/k8sec"
-    imageTag: "v0.1.5"
+    imageRepo: "ghcr.io/openclarity"
+    imageTag: "v0.6.0"
     imagePullPolicy: Always
 
   ## Logging level (debug, info, warning, error, fatal, panic).
@@ -263,7 +275,7 @@ kubeclarity-trivy-server:
   image:
     registry: docker.io
     repository: aquasec/trivy
-    tag: 0.34.0
+    tag: 0.44.1
     pullPolicy: IfNotPresent
 
   ## By default disable requirement for persistent storage
@@ -316,8 +328,8 @@ kubeclarity-sbom-db:
       memory: "20Mi"
       cpu: "10m"
     limits:
-      memory: "100Mi"
-      cpu: "100m"
+      memory: "1Gi"
+      cpu: "200m"
 
 ## End of KubeClarity SBOM DB Values
 #######################################################################################

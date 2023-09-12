@@ -48,6 +48,7 @@ func (s *Scanner) jobBatchManagement() {
 	s.Lock()
 	imageIDToScanData := s.imageIDToScanData
 	numberOfWorkers := s.scanConfig.MaxScanParallelism
+
 	imagesStartedToScan := &s.progress.ImagesStartedToScan
 	imagesCompletedToScan := &s.progress.ImagesCompletedToScan
 	s.Unlock()
@@ -60,7 +61,8 @@ func (s *Scanner) jobBatchManagement() {
 	fullScanDone := make(chan bool)
 
 	// spawn workers
-	for i := 0; i < numberOfWorkers; i++ {
+	log.WithFields(s.logFields).Infof("running %d scan workers", numberOfWorkers)
+	for i := int64(0); i < numberOfWorkers; i++ {
 		go s.worker(q, i, done, s.killSignal)
 	}
 
@@ -108,7 +110,7 @@ func (s *Scanner) jobBatchManagement() {
 }
 
 // worker waits for data on the queue, runs a scan job and waits for results from that scan job. Upon completion, done is notified to the caller.
-func (s *Scanner) worker(queue chan *scanData, workNumber int, done, ks chan bool) {
+func (s *Scanner) worker(queue chan *scanData, workNumber int64, done, ks chan bool) {
 	for {
 		select {
 		case data := <-queue:
@@ -282,19 +284,25 @@ func (s *Scanner) createJob(data *scanData) (*batchv1.Job, error) {
 		removeCISDockerBenchmarkScannerFromJob(job)
 	}
 	job.SetName(jobName)
-	job.SetNamespace(podContext.namespace)
+	if job.Namespace == "" {
+		// Set job namespace to pod namespace if not set in the template.
+		// May be overridden later if support for image pull secrets or SA credentials is needed.
+		job.SetNamespace(podContext.namespace)
+	}
 	setJobScanUUID(job, data.scanUUID)
 	setJobImageIDToScan(job, data.imageID)
 	setJobImageHashToScan(job, data.imageHash)
 	setJobImageNameToScan(job, podContext.imageName)
 
 	if len(podContext.imagePullSecrets) > 0 {
+		// Job must run on pod namespace to be able to mount image pull secrets.
+		job.SetNamespace(podContext.namespace)
 		for _, secretName := range podContext.imagePullSecrets {
 			addJobImagePullSecretVolume(job, secretName)
 		}
 		setJobImagePullSecretPath(job)
 	} else {
-		// Use private repo sa credentials only if there is no imagePullSecret
+		// Use private repo sa credentials only if there is no imagePullSecret.
 		for _, adder := range s.credentialAdders {
 			if adder.ShouldAdd() {
 				adder.Add(job)
